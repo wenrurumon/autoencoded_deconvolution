@@ -62,3 +62,5 @@ model <- vae(X,256,10)
 X.feature <- model$encoder %>% predict(X)
 X.fit <- model$decoder %>% predict(X.feature)
 X.fit2 <- model$vae %>% predict(X)
+
+#
