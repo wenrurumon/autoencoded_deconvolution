@@ -5,12 +5,6 @@ library(keras)
 #VAE
 
 vae <- function(X,intermediate_dim,latent_dim,epsilon_std=1,epochs=50,batch_size=100){
-  init <- function(X){
-    X <- (X-min(X))/(max(X)-min(X))
-    X <- array_reshape(X,c(nrow(X),length(X)/nrow(X)))
-    X
-  }
-  X <- init(X)
   original_dim <- ncol(X)
   x <- layer_input(shape = c(original_dim))
   h <- layer_dense(x, intermediate_dim, activation = "relu")
@@ -50,16 +44,21 @@ vae <- function(X,intermediate_dim,latent_dim,epsilon_std=1,epochs=50,batch_size
     epochs = epochs, 
     batch_size = batch_size 
   )
-  return(list(encoder=encoder,decoder=generator,vae=vae,init=init,history=history))
+  return(list(score=(encoder%>%predict(X)),
+    encoder=encoder,decoder=generator,vae=vae,history=history))
 }
 
 #Test
 
+init <- function(X){
+  X <- (X-min(X))/(max(X)-min(X))
+  X <- array_reshape(X,c(nrow(X),length(X)/nrow(X)))
+  X
+}
 mnist <- dataset_mnist()
-X <- mnist$train$x
+X <- init(mnist$train$x)
 model <- vae(X,256,10)
 
-X.feature <- model$encoder %>% predict(model$init(X))
+X.feature <- model$encoder %>% predict(X)
 X.fit <- model$decoder %>% predict(X.feature)
-X.fit2 <- model$vae %>% predict(model$init(X))
-
+X.fit2 <- model$vae %>% predict(X)
