@@ -1,3 +1,4 @@
+
 rm(list=ls())
 library(keras)
 
@@ -44,7 +45,7 @@ vae <- function(X,intermediate_dim=ncol(X),latent_dim=floor(ncol(X)/10),epsilon_
     batch_size = batch_size 
   )
   return(list(score=(encoder%>%predict(X)),
-              encoder=encoder,model=vae,history=history))
+              encoder=encoder,decoder=generator,model=vae,history=history))
 }
 
 #AE
@@ -94,7 +95,6 @@ pca <- function(A,rank=0,ifscale=TRUE){
   z <- x %*% y
   rlt <- list(rank=r,X=x,Y=y,Z=x%*%y,prop=prop,info=info)
   return(rlt)
-
   }
 qpca <- function(A,prop=0.99,ifscale=TRUE){
   x <- pca(A,rank=0,ifscale=TRUE)
@@ -132,4 +132,4 @@ mse(fit.vae3,x_test)
 mse(fit.ae,x_test)
 mse(model.pca$Z,x_test)
 
-
+#
