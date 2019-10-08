@@ -76,6 +76,7 @@ t = datetime.now()
 model,encoder,decoder,history = vae(Z,Z,0,0,256,10,1,0.1)
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
+history['argv'] = argv
 fo = open('/lustre/wangjc01/huzixin/deconv/log/vae_%s.log' % np.int(np.int(datetime.now().timestamp()*1000000)), "w")
 for k in history:
     fo.write('%s: %s\n' % (k, history[k]))
