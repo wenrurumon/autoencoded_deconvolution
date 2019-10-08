@@ -1,6 +1,8 @@
 
 ###########################################################################
 # vali_latent.py
+#argv = syntax, Zsel, latent_dim, batch_size, epochs
+#argv = ['test.py','250','200','128','10','1']
 ###########################################################################
 
 import csv
@@ -38,6 +40,15 @@ def autoencoder(X,Y,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,ve
 		validation_split=validation_split,
 		verbose=verbose)
 	return ae,encoder,decoder,history
+def getarg(x):
+	return np.int(x)
+def dicts(x,y):
+	rlt = {}
+	for k,v in x.items():
+		rlt[k] = v
+	for k,v in y.items():
+		rlt[k] = v
+	return rlt
 data = []
 for line in csv.reader(open('bulk.csv','r')):
 	data.append(line)
@@ -45,30 +56,20 @@ bulk_data = np.array(data[1:],dtype='float')
 for i in range(bulk_data.shape[1]):
 	bulk_data[...,i] = (bulk_data[...,i]-np.min(bulk_data[...,i]))/(np.max(bulk_data[...,i])-np.min(bulk_data[...,i]))
 bulk_label = data[0]
-print(sys.argv)
-rlt = []
-Z_sel = np.int(sys.argv[1])
-argv = sys.argv[2:]
-Z = bulk_data[...,range(Z_sel)]
-for i in argv:
-	latent_dim = np.int(i)
-	t = datetime.now()
-	model, encoder, decoder, history = autoencoder(Z,Z,latent_dim=latent_dim,batch_size=256,epochs=100,verbose=2)
-	t = ((datetime.now() - t).seconds)
-	os.system('touch /lustre/wangjc01/huzixin/deconv/log/log_%s_%s_%s_%s'%(Z_sel,latent_dim,t,mse_score(model.predict(Z),Z)))
-
-
-###########################################################################
-# Batch vali latent
-#python3 vali_latent.py 25910 250&
-###########################################################################
-
-Z_sel <- 25910
-latent_dim <- (1:40) * 50
-syntax <- apply(t(matrix(latent_dim,nrow=5)),1,function(x){paste(x,collapse=' ')})
-syntax <- paste0('python3 vali_latent.py ',Z_sel,' ',syntax,'&')
-for(i in 1:8){
-	system(syntax[i])
-}
+argv = sys.argv
+Zsel = getarg(argv[1])
+latent_dim = getarg(argv[2])
+batch_size = getarg(argv[3])
+epochs = getarg(argv[4])
+verbose = getarg(argv[5])
+Z = bulk_data[...,range(Zsel)]
+t = datetime.now()
+model, encoder, decoder, history = autoencoder(Z,Z,latent_dim=latent_dim,batch_size=batch_size,epochs=epochs,verbose=verbose)
+history = dicts(history.params,history.history)
+history['time'] = (datetime.now()-t).seconds
+fo = open('%s.log' % np.int(np.int(datetime.now().timestamp()*1000000)), "w")
+for k in history:
+	fo.write('/lustre/wangjc01/huzixin/deconv/%s: %s\n' % (k, history[k]))
+fo.write( str )
 
 
