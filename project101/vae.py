@@ -73,7 +73,7 @@ epochs = getarg(argv[4])
 verbose = getarg(argv[5])
 Z = bulk_data[...,range(Zsel)]
 t = datetime.now()
-model,encoder,decoder,history = vae(Z,Z,0,0,256,10,1,0.1)
+model, encoder, decoder, history = vae(Z,Z,latent_dim=latent_dim,batch_size=batch_size,epochs=epochs,verbose=verbose)  
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
