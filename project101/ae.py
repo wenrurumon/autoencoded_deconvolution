@@ -68,6 +68,7 @@ t = datetime.now()
 model, encoder, decoder, history = autoencoder(Z,Z,latent_dim=latent_dim,batch_size=batch_size,epochs=epochs,verbose=verbose)
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
+history['argv'] = argv
 fo = open('/lustre/wangjc01/huzixin/deconv/log/ae_%s.log' % np.int(np.int(datetime.now().timestamp()*1000000)), "w")
 for k in history:
 	fo.write('%s: %s\n' % (k, history[k]))
