@@ -1,8 +1,9 @@
 
 ###########################################################################
 # vali_latent.py
-#argv = syntax, Zsel, latent_dim, batch_size, epochs
-#argv = ['test.py','250','200','128','10','1']
+# argv = syntax, Zsel, latent_dim, batch_size, epochs
+# argv = ['test.py','250','200','128','10','1']
+# python3 vali_latent.py 25910 200 256 200 0&
 ###########################################################################
 
 import csv
@@ -67,9 +68,9 @@ t = datetime.now()
 model, encoder, decoder, history = autoencoder(Z,Z,latent_dim=latent_dim,batch_size=batch_size,epochs=epochs,verbose=verbose)
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
-fo = open('%s.log' % np.int(np.int(datetime.now().timestamp()*1000000)), "w")
+fo = open('/lustre/wangjc01/huzixin/deconv/log/ae_%s.log' % np.int(np.int(datetime.now().timestamp()*1000000)), "w")
 for k in history:
-	fo.write('/lustre/wangjc01/huzixin/deconv/%s: %s\n' % (k, history[k]))
-fo.write( str )
+	fo.write('%s: %s\n' % (k, history[k]))
+fo.close()
 
 
