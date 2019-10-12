@@ -1,10 +1,3 @@
-###########################################################################
-# ae.py
-# argv = syntax, Zsel, latent_dim, batch_size, epochs
-# argv = ['test.py','250','200','128','10','1']
-# python3 ae.py 25910 300 256 300 0&
-###########################################################################
-
 import csv
 import sys
 import os
@@ -67,13 +60,11 @@ epochs = getarg(argv[4])
 verbose = getarg(argv[5])
 Z = bulk_data[...,range(Zsel)]
 t = datetime.now()
-model, encoder, decoder, history = autoencoder(Z,Z,latent_dim=latent_dim,batch_size=batch_size,epochs=ep
-ochs,verbose=verbose)
+model, encoder, decoder, history = autoencoder(Z,Z,latent_dim=latent_dim,batch_size=batch_size,epochs=epochs,verbose=verbose)
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
-fo = open('/lustre/wangjc01/huzixin/deconv/log/log_%s.log' % np.int(np.int(datetime.now().timestamp()*10
-00000)), "w")
+fo = open('/lustre/wangjc01/huzixin/deconv/log/log_%s.log' % np.int(np.int(datetime.now().timestamp()*1000000)), "w")
 for k in history:
         fo.write('%s: %s\n' % (k, history[k]))
 fo.close()
