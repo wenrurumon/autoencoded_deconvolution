@@ -45,12 +45,11 @@ def dicts(x,y):
                 rlt[k] = v
         return rlt
 data = []
-for line in csv.reader(open('bulk.csv','r')):
+for line in csv.reader(open('data/bulk.csv','r')):
         data.append(line)
 bulk_data = np.array(data[1:],dtype='float')
 for i in range(bulk_data.shape[1]):
-        bulk_data[...,i] = (bulk_data[...,i]-np.min(bulk_data[...,i]))/(np.max(bulk_data[...,i])-np.min(
-bulk_data[...,i]))
+        bulk_data[...,i] = (bulk_data[...,i]-np.min(bulk_data[...,i]))/(np.max(bulk_data[...,i])-np.min(bulk_data[...,i]))
 bulk_label = data[0]
 argv = sys.argv
 Zsel = getarg(argv[1])
@@ -68,3 +67,4 @@ fo = open('/lustre/wangjc01/huzixin/deconv/log/log_%s.log' % np.int(np.int(datet
 for k in history:
         fo.write('%s: %s\n' % (k, history[k]))
 fo.close()
+
