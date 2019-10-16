@@ -35,6 +35,12 @@ def ae(X,Y,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=0,v
                 validation_split=validation_split,
                 verbose=verbose)
         return ae,encoder,decoder,history
+def sampling(args):
+    z_mean, z_log_var = args
+    batch = K.shape(z_mean)[0]
+    dim = K.int_shape(z_mean)[1]
+    epsilon = K.random_normal(shape=(batch, dim))
+    return z_mean + K.exp(0.5 * z_log_var) * epsilon
 def vae(X,Y=0,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=0,validation_split=0.1):
     if intermediate_dim == 0: intermediate_dim = X.shape[1]
     if latent_dim == 0: latent_dim = int(np.floor(intermediate_dim/20))
