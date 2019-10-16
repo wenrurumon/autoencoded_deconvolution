@@ -106,6 +106,7 @@ model, encoder, decoder, history = model(Z,Z,latent_dim=latent_dim,batch_size=ba
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
+history['mse'] = mse_score(model.predict(Z),Z)
 fo = np.int(np.int(datetime.now().timestamp()*1000000))
 model.save('/lustre/wangjc01/huzixin/deconv/log/%s.model' % fo)
 encoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.encoder' % fo)
