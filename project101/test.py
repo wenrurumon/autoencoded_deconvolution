@@ -70,8 +70,11 @@ history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
 
-
-fo = open('/lustre/wangjc01/huzixin/deconv/log/aed_%s.log' % np.int(np.int(datetime.now().timestamp()*1000000)), "w")
+fo = np.int(np.int(datetime.now().timestamp()*1000000))
+model.save('/lustre/wangjc01/huzixin/deconv/log/%s.model' % fo)
+encoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.encoder' % fo)
+decoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.decoder' % fo)
+fo = open('/lustre/wangjc01/huzixin/deconv/log/%s.log' % fo, "w")
 for k in history:
         fo.write('%s: %s\n' % (k, history[k]))
 
