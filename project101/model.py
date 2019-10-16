@@ -83,7 +83,8 @@ bulk_data = np.array(data[1:],dtype='float')
 for i in range(bulk_data.shape[1]):
         bulk_data[...,i] = (bulk_data[...,i]-np.min(bulk_data[...,i]))/(np.max(bulk_data[...,i])-np.min(bulk_data[...,i]))
 bulk_label = data[0]
-argv = ['test.py','ae',200,200,128,50,1]
+#argv = ['test.py','ae',200,200,128,50,1]
+argv = sys.argv
 if argv[1] == 'ae':
   model = ae
 elif argv[1] == 'vae':
