@@ -35,7 +35,7 @@ def ae(X,Y,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=0,v
                 validation_split=validation_split,
                 verbose=verbose)
         return ae,encoder,decoder,history
-def vae(X,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=0,validation_split=0.1):
+def vae(X,Y=0,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=0,validation_split=0.1):
     if intermediate_dim == 0: intermediate_dim = X.shape[1]
     if latent_dim == 0: latent_dim = int(np.floor(intermediate_dim/20))
     if batch_size == 0: batch_size = X.shape[0] 
