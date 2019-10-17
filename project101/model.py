@@ -107,7 +107,7 @@ history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
 history['mse'] = mse_score(model.predict(Z),Z)
-fo = np.int(np.int(datetime.now().timestamp()*1000000))
+fo = '_'.join([str(i) for i in argv[1:]])
 model.save('/lustre/wangjc01/huzixin/deconv/log/%s.model' % fo)
 encoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.encoder' % fo)
 decoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.decoder' % fo)
