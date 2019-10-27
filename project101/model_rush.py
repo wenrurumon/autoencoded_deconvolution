@@ -20,12 +20,12 @@ def ae(X,Y,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=0,v
         input_dim = X.shape[1]
         output_dim = Y.shape[1]
         ae_input = Input(shape=(input_dim,), name='encoder_input')
-        ae_inter = Dropout(0.1)(Dense(intermediate_dim, activation='sigmoid')(ae_input))
-        ae_latent = Dropout(0.1)(Dense(latent_dim, activation='sigmoid')(ae_inter))
+        ae_inter = Dropout(0.2)(Dense(intermediate_dim, activation='sigmoid')(ae_input))
+        ae_latent = Dropout(0.2)(Dense(latent_dim, activation='sigmoid')(ae_inter))
         encoder = Model(ae_input,ae_latent,name='encoder')
         latent_input = Input(shape=(latent_dim,), name='latent')
-        ae_inter2 = Dropout(0.1)(Dense(intermediate_dim, activation='sigmoid')(latent_input))
-        ae_output = Dropout(0.1)(Dense(output_dim, activation='sigmoid')(ae_inter2))
+        ae_inter2 = Dropout(0.2)(Dense(intermediate_dim, activation='sigmoid')(latent_input))
+        ae_output = Dropout(0.2)(Dense(output_dim, activation='sigmoid')(ae_inter2))
         decoder = Model(latent_input,ae_output,name='decoder')
         ae = Model(ae_input, decoder(encoder(ae_input)), name='autoencoder')
         ae.compile(loss='mse', optimizer='adam')
@@ -48,14 +48,14 @@ def vae(X,Y=0,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=
     input_dim = X.shape[1]
     output_dim = X.shape[1]
     inputs = Input(shape=(input_dim,), name='encoder_input')
-    x = Dropout(0.1)(Dense(intermediate_dim, activation='sigmoid')(inputs))
-    z_mean = Dropout(0.1)(Dense(latent_dim, name='z_mean')(x))
-    z_log_var = Dropout(0.1)(Dense(latent_dim, name='z_log_var')(x))
+    x = Dropout(0.2)(Dense(intermediate_dim, activation='sigmoid')(inputs))
+    z_mean = Dropout(0.2)(Dense(latent_dim, name='z_mean')(x))
+    z_log_var = Dropout(0.2)(Dense(latent_dim, name='z_log_var')(x))
     z = Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
     encoder = Model(inputs, [z_mean, z_log_var, z], name='encoder')
     latent_inputs = Input(shape=(latent_dim,), name='z_sampling')
-    x = Dropout(0.1)(Dense(intermediate_dim, activation='sigmoid')(latent_inputs))
-    outputs = Dropout(0.1)(Dense(input_dim, activation='sigmoid')(x))
+    x = Dropout(0.2)(Dense(intermediate_dim, activation='sigmoid')(latent_inputs))
+    outputs = Dropout(0.2)(Dense(input_dim, activation='sigmoid')(x))
     decoder = Model(latent_inputs, outputs, name='decoder')
     outputs = decoder(encoder(inputs)[2])
     vae = Model(inputs, outputs, name='vae_mlp')
@@ -89,20 +89,21 @@ bulk_data = np.array(data[1:],dtype='float')
 for i in range(bulk_data.shape[1]):
         bulk_data[...,i] = (bulk_data[...,i]-np.min(bulk_data[...,i]))/(np.max(bulk_data[...,i])-np.min(bulk_data[...,i]))
 bulk_label = data[0]
-#argv = ['test.py','ae',200,200,128,50,1]
+#argv = ['test.py','ae',200,1024,200,128,50,1]
 argv = sys.argv
 if argv[1] == 'ae':
   model = ae
 elif argv[1] == 'vae':
   model = vae
 Zsel = getarg(argv[2])
-latent_dim = getarg(argv[3])
-batch_size = getarg(argv[4])
-epochs = getarg(argv[5])
-verbose = getarg(argv[6])
+intermediate_dim = getarg(argv[3])
+latent_dim = getarg(argv[4])
+batch_size = getarg(argv[5])
+epochs = getarg(argv[6])
+verbose = getarg(argv[7])
 Z = bulk_data[...,range(Zsel)]
 t = datetime.now()
-model, encoder, decoder, history = model(Z,Z,latent_dim=latent_dim,batch_size=batch_size,epochs=epochs,verbose=verbose)
+model, encoder, decoder, history = model(Z,Z,intermediate_dim=intermediate_dim,latent_dim=latent_dim,batch_size=batch_size,epochs=epochs,verbose=verbose)
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
