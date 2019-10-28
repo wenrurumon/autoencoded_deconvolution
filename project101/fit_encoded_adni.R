@@ -10,9 +10,11 @@ models.data <- lapply(models,function(m){
   x <- paste0(m,'.ref_encoded') %>% read.csv
   list(y=y,x=x)
 })
+j <- 0
 models.deconv <- lapply(models.data,function(m){
-  rlt.deconv <- deconv(t(m$x),t(m$y))
-  rlt.fit <- dedeconv((m$x),rlt.deconv$coef,(m$y),ifprint=T)
+  print(paste('####################',j<<-j+1,'####################'))
+  rlt.deconv <- deconv(t(m$x),t(m$y),ifprint=T)
+  rlt.fit <- dedeconv((m$x),rlt.deconv$coef,(m$y))
   rlt.fit
 })
 for(i in 1:4){
