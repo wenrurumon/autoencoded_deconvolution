@@ -83,12 +83,12 @@ def dicts(x,y):
                 rlt[k] = v
         return rlt
 data = []
-for line in csv.reader(open('/lustre/wangjc01/huzixin/deconv/data/bulk.csv','r')):
+for line in csv.reader(open('/lustre/wangjc01/huzixin/deconv/data/bulk_adni.csv','r')):
         data.append(line)
-bulk_data = np.array(data[1:],dtype='float')
+bulk_data = np.array(np.array(data)[1:],dtype='float')
 for i in range(bulk_data.shape[1]):
         bulk_data[...,i] = (bulk_data[...,i]-np.min(bulk_data[...,i]))/(np.max(bulk_data[...,i])-np.min(bulk_data[...,i]))
-bulk_label = data[0]
+bulk_label = np.array(data)[0]
 #argv = ['test.py','ae',16055,1024,200,128,50,1]
 argv = sys.argv
 if argv[1] == 'ae':
@@ -109,10 +109,10 @@ history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
 history['mse'] = mse_score(model.predict(Z),Z)
 fo = '_'.join([str(i) for i in argv[1:]])
-model.save('/lustre/wangjc01/huzixin/deconv/log/%s.model_adni' % fo)
-encoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.encoder_adni' % fo)
-decoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.decoder_adni' % fo)
-fo = open('/lustre/wangjc01/huzixin/deconv/log/%s.rlt_adni' % fo, "w")
+model.save('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.model' % fo)
+encoder.save('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.encoder' % fo)
+decoder.save('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.decoder' % fo)
+fo = open('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.rlt' % fo, "w")
 for k in history:
         fo.write('%s: %s\n' % (k, history[k]))
 fo.close()
