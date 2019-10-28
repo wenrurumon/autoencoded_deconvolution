@@ -301,3 +301,11 @@ PosLM <- function(Yi,X){
   outi <- colSums(X) * outi
   outi/sum(outi)
 }
+
+DeconvLM <- function(Y,X,ifprint=F){
+  dlmi <- 0
+  sapply(Y,2,function(yi){
+    if(ifprint){print(dlmi<<-dlim+1)}
+    return(PosLM(yi,X))
+  })
+}
