@@ -10,7 +10,7 @@ from keras import backend as K
 import numpy as np
 from datetime import datetime
 def mse_score(fit,actual):
-        return np.mean(np.square(fit-actual))
+        return np.mean(np.square(fit-actual))/np.mean(np.square(actual-np.mean(actual)))
 def ae(X,Y,intermediate_dim=0,latent_dim=0,batch_size=256,epochs=100,verbose=0,validation_split=0.1):
         if intermediate_dim == 0: intermediate_dim = X.shape[1]
         if latent_dim == 0: latent_dim = int(np.floor(intermediate_dim/20))
