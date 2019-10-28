@@ -12,7 +12,7 @@ from datetime import datetime
 import pandas as pd
 
 def mse_score(fit,actual):
-        return np.mean(np.square(fit-actual))
+        return np.mean(np.square(fit-actual))/np.mean(np.square(actual-np.mean(actual)))
 
 data = []
 for line in csv.reader(open('/lustre/wangjc01/huzixin/deconv/data/bulk.csv','r')):
@@ -33,11 +33,10 @@ models = ['ae_25910_1024_250_256_4000_2',
 'vae_25910_1024_401_256_4000_2']
 
 def decoding(m,x):
-  m_decoder = '/lustre/wangjc01/huzixin/deconv/log/rlt/%s.decoder'%m
+  m_decoder = '/lustre/wangjc01/huzixin/deconv/log/rlt_rush/%s.decoder'%m
   decoder = load_model(m_decoder)
   bulk_decoder = decoder.predict(x)
   return(bulk_decoder)
-
 
 np.set_printoptions(precision=20)
 models_decoded = []
@@ -47,7 +46,7 @@ for m in models:
   models_decoded.append(decoding(m,x))
 
 for i in models_decoded:
-  mse_score(i,bulk_data
+  mse_score(i,bulk_data)
 
 for i in range(4):
   pd.DataFrame(models_decoded[i]).to_csv('/lustre/wangjc01/huzixin/deconv/log/rlt/%s.bulk_fit'%models[i],index=0)
