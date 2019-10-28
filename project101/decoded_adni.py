@@ -37,7 +37,7 @@ models = ['ae_16055_1024_200_256_4000_2',
 'vae_16055_1024_350_256_4000_2']
 
 def decoding(m,x):
-  m_decoder = '/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.decoder_adni'%m
+  m_decoder = '/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.decoder'%m
   decoder = load_model(m_decoder)
   bulk_decoder = decoder.predict(x)
   return(bulk_decoder)
@@ -45,7 +45,12 @@ def decoding(m,x):
 np.set_printoptions(precision=20)
 models_decoded = []
 for m in models:
-  x = np.loadtxt('%s.fit_encoded'%m,delimiter=',',dtype=str)[1:,...]
+  x = np.loadtxt('/lustre/wangjc01/huzixin/deconv/log/deconv_adni/%s.fit_encoded_stf'%m,delimiter=',',dtype=str)[1:,...]
+  x = np.array(x,dtype='float128')
+  models_decoded.append(decoding(m,x))
+
+for m in models:
+  x = np.loadtxt('/lustre/wangjc01/huzixin/deconv/log/deconv_adni/%s.fit_encoded_lm'%m,delimiter=',',dtype=str)[1:,...]
   x = np.array(x,dtype='float128')
   models_decoded.append(decoding(m,x))
 
@@ -53,4 +58,8 @@ for i in models_decoded:
   mse_score(i,bulk_data)
 
 for i in range(8):
-  pd.DataFrame(models_decoded[i]).to_csv('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.bulk_fit'%models[i],index=0)
+  pd.DataFrame(models_decoded[i]).to_csv('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.bulk_fit_stf'%models[i],index=0)
+
+for i in range(8,16):
+  pd.DataFrame(models_decoded[i]).to_csv('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.bulk_fit_lm'%models[i-8],index=0)
+
