@@ -50,3 +50,4 @@ for i in models_decoded:
 
 for i in range(4):
   pd.DataFrame(models_decoded[i]).to_csv('/lustre/wangjc01/huzixin/deconv/log/rlt/%s.bulk_fit'%models[i],index=0)
+
