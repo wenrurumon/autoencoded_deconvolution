@@ -36,8 +36,6 @@ for(i in 1:8){
   write.csv(models.deconv[[i]],paste0(models[i],'.fit_encoded_lm'),row.names=F)
 }
 
-
-
 check <- lapply(models,function(m){
   read.csv(paste0(m,'.fit_encoded'))
 })
