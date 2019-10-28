@@ -45,11 +45,11 @@ def encoding(m,x):
 
 models_encoded = []
 for m in models:
-  models_encoded.append(encoding(m,bulk_data))
+  models_encoded.append(encoding(m,bulk_data)[2])
 
 ref_encoded = []
 for m in models:
-  ref_encoded.append(encoding(m,ref_data))
+  ref_encoded.append(encoding(m,ref_data)[2])
 
 for i in range(4):
   pd.DataFrame(models_encoded[i]).to_csv('/lustre/wangjc01/huzixin/deconv/log/rlt_adni/%s.bulk_encoded'%models[i],index=0)
