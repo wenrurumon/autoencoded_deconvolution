@@ -284,3 +284,20 @@ lmpos <- function(y,x){
 minmax <- function(x){
   (x-min(x))/(max(x)-min(x))
 }
+
+PosLM <- function(Yi,X){
+  Yi <- minmax(Yi)
+  X <- apply(X,2,minmax)
+  colnames(X) <- 1:ncol(X)
+  Xi <- X
+  while(T){
+    Mi <- coef(summary(lm(Yi~Xi)))[-1,]
+    sel <- (which.min(Mi[,3]))
+    Xi <- Xi[,-sel,drop=F]
+    if(Mi[sel,1] > 0){break}
+  }
+  outi <- rep(0,ncol(X))
+  outi[as.numeric(gsub('Xi','',rownames(Mi)))] <- Mi[,1]
+  outi <- colSums(X) * outi
+  outi/sum(outi)
+}
