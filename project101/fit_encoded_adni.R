@@ -10,16 +10,33 @@ models.data <- lapply(models,function(m){
   x <- paste0(m,'.ref_encoded') %>% read.csv
   list(y=y,x=x)
 })
+
+#DeconvSTF
+
 j <- 0
 models.deconv <- lapply(models.data,function(m){
   print(paste('####################',j<<-j+1,'####################'))
-  rlt.deconv <- deconv(t(m$x),t(m$y),ifprint=T)
+  rlt.deconv <- deconv(t(m$x),t(m$y),ifprint=F)
   rlt.fit <- dedeconv((m$x),rlt.deconv$coef,(m$y))
   rlt.fit
 })
-for(i in 1:4){
-  write.csv(models.deconv[[i]],paste0(models[i],'.fit_encoded'),row.names=F)
+for(i in 1:8){
+  write.csv(models.deconv[[i]],paste0(models[i],'.fit_encoded_stf'),row.names=F)
 }
+
+#DeconvLM
+
+models.deconlm <- lapply(models.data,function(m){
+  print(paste('####################',j<<-j+1,'####################'))
+  rlt.deconv <- deconv.lm(t(m$x),t(m$y),ifprint=F)
+  rlt.fit <- dedeconv((m$x),rlt.deconv,(m$y))
+  rlt.fit
+})
+for(i in 1:8){
+  write.csv(models.deconv[[i]],paste0(models[i],'.fit_encoded_lm'),row.names=F)
+}
+
+
 
 check <- lapply(models,function(m){
   read.csv(paste0(m,'.fit_encoded'))
