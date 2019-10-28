@@ -12,7 +12,7 @@ from datetime import datetime
 import pandas as pd
 
 def mse_score(fit,actual):
-        return np.mean(np.square(fit-actual))
+        return np.mean(np.square(fit-actual))/np.mean(np.square(fit-np.mean(actual)))
 
 data = []
 for line in csv.reader(open('/lustre/wangjc01/huzixin/deconv/data/bulk_adni.csv','r')):
