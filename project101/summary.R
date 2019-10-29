@@ -1,21 +1,29 @@
 
 rm(list=ls())
-library(data.table)
-library(dplyr)
 source('/Users/wenrurumon/Documents/uthealth/deconv/ae/model.R')
 
-setwd('~/Documents/uthealth/deconv/ae')
-bulk_rush <- fread('bulk.csv')
-setwd('~/Documents/uthealth/deconv/adni_data')
-bulk_adni <- fread('bulk_adni.csv')
+setwd("/Users/wenrurumon/Documents/uthealth/deconv/adni_data")
+bulk <- fread('bulk_adni.csv')
+ref <- fread('ref_adni.csv')
 
-read_csv <- function(x){
-  print(i<<-i+1)
-  read.csv(x)
-}
+setwd("/Users/wenrurumon/Documents/uthealth/deconv/ae")
+bulk <- fread('bulk.csv') 
+ref <- fread('reference.csv')
 
-i <- 0
-setwd('~/Documents/uthealth/deconv/rlt/rush')
-fit_rush <- lapply(dir(pattern='bulk_fit'),read_csv)
-setwd('~/Documents/uthealth/deconv/rlt/adni')
-fit_adni <- lapply(dir(pattern='bulk_fit'),fread)
+x <- ref %>% as.matrix 
+y <- bulk %>% as.matrix
+x.sel <- apply(x,1,function(xi){
+  names(which(xi>quantile(xi,0.99)))
+}) %>% unlist %>% unique
+y.sel <- y[,colnames(y)%in%x.sel]
+x.sel <- x[,colnames(x)%in%x.sel]
+dim(y.sel)
+system.time(deconv.sel <- deconv(t(x.sel),t(y.sel),ifprint=T))
+fit.sel <- dedeconv((x),deconv.sel$coef,(y))
+mse.sel <- mse(fit.sel,y)
+rlt.sel <- list(fit=fit.sel,mse=mse.sel)
+
+system.time(deconv.sel <- deconv.lm(t(x.sel),t(y.sel),ifprint=T))
+fit.sel <- dedeconv((x),deconv.sel,(y))
+mse.sel <- mse(fit.sel,y)
+rlt.sel <- list(fit=fit.sel,mse=mse.sel)
