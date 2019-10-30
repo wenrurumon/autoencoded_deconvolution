@@ -60,7 +60,7 @@ bulk = minmax(pd.read_csv('/lustre/wangjc01/huzixin/deconv/data/bulk.csv'))
 ref = minmax(pd.read_csv('/lustre/wangjc01/huzixin/deconv/data/reference.csv'))
 cdata = np.concatenate((bulk,ref),axis=0)
 
-argv = ['test.py','ae',25910,1024,200,128,200,1]
+argv = ['test.py','ae',25910,1024,200,128,50,1]
 if argv[1] == 'ae':
   model = ae
 elif argv[1] == 'vae':
@@ -79,13 +79,13 @@ model, encoder, decoder, history = model(Z,Z,intermediate_dim=intermediate_dim,l
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
-history['mse'] = mse_score(model.predict(Z),Z)
+bulk_encoded = encoder.predict(bulk)
+ref_encoded = encoder.predict(ref)
+history['mse'] = [mse_score(model.predict(Z),Z),mse_score(decoder.predict(bulk_encoded),bulk),mse_score(decoder.predict(ref_encoded),ref)]
 
 fo = "%s_%s" % ('_'.join([str(i) for i in argv[1:]]),time.strftime('%Y%m%d%H%M%S',time.localtime(time.time())))
 encoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.encoder' % fo)
 decoder.save('/lustre/wangjc01/huzixin/deconv/log/%s.decoder' % fo)
-bulk_encoded = encoder.predict(bulk)
-ref_encoded = encoder.predict(ref)
 pd.DataFrame(bulk_encoded).to_csv('/lustre/wangjc01/huzixin/deconv/log/%s.bulk_encoded'%fo,index=0)
 pd.DataFrame(ref_encoded).to_csv('/lustre/wangjc01/huzixin/deconv/log/%s.ref_encoded'%fo,index=0)
 fo = open('/lustre/wangjc01/huzixin/deconv/log/%s.rlt' % fo, "w")
