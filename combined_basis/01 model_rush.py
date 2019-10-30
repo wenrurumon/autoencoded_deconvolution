@@ -92,7 +92,7 @@ def minmax(x):
 bulk = minmax(pd.read_csv('/lustre/wangjc01/huzixin/deconv/data/bulk.csv'))
 ref = minmax(pd.read_csv('/lustre/wangjc01/huzixin/deconv/data/reference.csv'))
 cdata = np.concatenate((bulk,ref),axis=0)
-argv = ['test.py','ae',25910,1024,200,128,50,1]
+#argv = ['test.py','ae',25910,1024,200,128,50,1]
 argv = sys.argv
 if argv[1] == 'ae':
   model = ae
@@ -110,6 +110,8 @@ model, encoder, decoder, history = model(Z,Z,intermediate_dim=intermediate_dim,l
 history = dicts(history.params,history.history)
 history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
+bulk = bulk[...,range(Zsel)]
+ref = ref[...,range(Zsel)]
 bulk_encoded = encoder.predict(bulk)
 ref_encoded = encoder.predict(ref)
 history['mse'] = [mse_score(model.predict(Z),Z),mse_score(decoder.predict(bulk_encoded),bulk),mse_score(decoder.predict(ref_encoded),ref)]
