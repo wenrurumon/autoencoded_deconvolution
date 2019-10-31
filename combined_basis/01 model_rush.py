@@ -112,8 +112,12 @@ history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
 bulk = bulk[...,range(Zsel)]
 ref = ref[...,range(Zsel)]
-bulk_encoded = encoder.predict(bulk)
-ref_encoded = encoder.predict(ref)
+if argv[1] = 'ae':
+        bulk_encoded = encoder.predict(bulk)
+        ref_encoded = encoder.predict(ref)
+elif argv[1] == 'vae':
+        bulk_encoded = encoder.predict(bulk)[2]
+        ref_encoded = encoder.predict(ref)[2]
 history['mse'] = [mse_score(model.predict(Z),Z),mse_score(decoder.predict(bulk_encoded),bulk),mse_score(decoder.predict(ref_encoded),ref)]
 fo = "%s_%s" % ('_'.join([str(i) for i in argv[1:]]),time.strftime('%Y%m%d%H%M%S',time.localtime(time.time())))
 encoder.save('/lustre/wangjc01/huzixin/deconv/log/rlt_rush/%s.encoder' % fo)
