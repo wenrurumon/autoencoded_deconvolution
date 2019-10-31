@@ -112,7 +112,7 @@ history['time'] = (datetime.now()-t).seconds
 history['argv'] = argv
 bulk = bulk[...,range(Zsel)]
 ref = ref[...,range(Zsel)]
-if argv[1] = 'ae':
+if argv[1] == 'ae':
         bulk_encoded = encoder.predict(bulk)
         ref_encoded = encoder.predict(ref)
 elif argv[1] == 'vae':
