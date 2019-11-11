@@ -37,12 +37,12 @@ par(mfrow=c(1,1))
 
 pheatmap(rlt.dis,
          color = colorRampPalette(c("firebrick3", "white"))(50))
-boxplot(value~Var1,data=melt(rlt.dis),
+boxplot(value~Var1,data=melt(rlt.dis)%>%filter(Var1!=Var2),
         par(las='2',mar=c(10,5,5,5)),
         xlab='',ylab='')
 
 fdata <- function(x){
-  r <- filter(melt(rlt.dis),grepl(x,Var1)&grepl(x,Var2))
+  r <- filter(melt(rlt.dis),grepl(x,Var1)&grepl(x,Var2)&Var1!=Var2)
   r <- data.frame(v1=paste(r$Var1),v2=paste(r$Var2),value=r$value)
   r
 }
