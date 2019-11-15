@@ -1,15 +1,17 @@
 
 music_quick <- function(bulk,ref,markers=NULL,select.ct=NULL,verbose=T,iter.max=1000,nu=0.0001,eps=0.01,centered=FALSE,normalize=FALSE){
-  M.theta <- Sigma <- data.ref
+  bulk <- apply(bulk,2,minmax)
+  ref <- apply(ref,2,minmax)
+  M.theta <- Sigma <- ref
   Sigma[,] <- 1
   S <- rbind(colMeans(M.theta))
   S[S == 0] = NA
   M.S = colMeans(S, na.rm = TRUE)
   D <- t(t(M.theta)*M.S)
-  gene <- rownames(data.ref)[which(rownames(data.ref)%in%rownames(data.bulk))]
+  gene <- rownames(ref)[which(rownames(ref)%in%rownames(bulk))]
   D1 <- D[match(gene,rownames(D)),,drop=F]
   M.S <- colMeans(S,na.rm=T)
-  Yjg <- relative.ab(data.bulk[match(gene,rownames(data.bulk)),,drop=F])
+  Yjg <- relative.ab(bulk[match(gene,rownames(bulk)),,drop=F])
   N.bulk <- ncol(Yjg)
   Sigma <- Sigma[match(gene,rownames(Sigma)),,drop=F]
   Est.prop.allgene = NULL
