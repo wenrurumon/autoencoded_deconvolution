@@ -1,12 +1,13 @@
+
 rm(list=ls())
 library(keras)
 library(dplyr)
 library(data.table)
-source('/Users/wenrurumon/Documents/uthealth/deconv/ae/model.R')
-setwd('/Users/wenrurumon/Documents/uthealth/deconv/rlt/')
-load('/Users/wenrurumon/Documents/uthealth/deconv/4nan/4nan.rda')
-ref_cluster <- substr(colnames(ref),1,2)
+library(nnls)
 
+#Data from autoencoder
+
+setwd('/Users/wenrurumon/Documents/uthealth/deconv/rlt/')
 models <- dir(pattern='encoded')
 models <- unique(do.call(rbind,strsplit(models,'\\.'))[,1])
 models.data <- lapply(models,function(m){
@@ -14,7 +15,48 @@ models.data <- lapply(models,function(m){
   x <- paste0(m,'.ref_encoded') %>% read.csv
   list(y=y,x=x)
 })
+lapply(models.data,function(x){c(dim(x[[1]]),dim(x[[2]]))})
 names(models.data) <- models
+
+#Data from gene selected
+
+genesel <- function(wf,bulk,ref){
+  setwd(wf)
+  bulk <- fread(bulk)
+  ref <- fread(ref)
+  x <- ref %>% as.matrix 
+  y <- bulk %>% as.matrix
+  x.sel <- apply(x,1,function(xi){
+    names(which(xi>quantile(xi,0.99)))
+  }) %>% unlist %>% unique
+  y.sel <- y[,colnames(y)%in%x.sel]
+  x.sel <- x[,colnames(x)%in%x.sel]
+  list(y=y.sel,x=x.sel)
+}
+genesel.load <- list(
+  c("/Users/wenrurumon/Documents/uthealth/deconv/adni_data",'bulk_adni.csv','ref_adni.csv'),
+  c('/Users/wenrurumon/Documents/uthealth/deconv/lmy','bulk_lmy.csv','ref_lmy.csv'),
+  c('/Users/wenrurumon/Documents/uthealth/deconv/ae','bulk.csv','reference.csv')
+)
+sel.data <- lapply(genesel.load,function(x){
+  genesel(x[1],x[2],x[3])
+})
+lapply(sel.data,function(x){c(dim(x[[1]]),dim(x[[2]]))})
+names(sel.data) <- gsub('ae','sel',models[1:3])
+
+models.data <- do.call(c,list(models.data,sel.data))
+t(sapply(models.data,function(x){c(dim(x[[1]]),dim(x[[2]]))}))
+
+#Sourcing
+
+setwd('/Users/wenrurumon/Documents/uthealth/deconv/lmy')
+for(i in dir(pattern='R')){
+  source(i)
+}
+source('/Users/wenrurumon/Documents/uthealth/deconv/ae/model.R')
+setwd('/Users/wenrurumon/Documents/uthealth/deconv/rlt/')
+load('/Users/wenrurumon/Documents/uthealth/deconv/4nan/4nan.rda')
+ref_cluster <- substr(colnames(ref),1,2)
 
 j <- 0
 
@@ -29,11 +71,6 @@ models.deconv <- lapply(models.data,function(m){
 rlt.deconv <- lapply(models.deconv,function(x){
   t(apply(x$deconv$coef,2,function(x){tapply(x,ref_cluster,sum)}))
 })
-for (i in c(1,3,2,4)){
-  heatmap(rlt.deconv[[i]],main=models[i])
-}
-lapply(rlt.deconv,function(x){apply(x,2,summary)})
-
 
 #DeconvLM
 
@@ -46,35 +83,34 @@ models.deconlm <- lapply(models.data,function(m){
 rlt.deconlm <- lapply(models.deconlm,function(x){
   t(apply(x$deconv,2,function(x){tapply(x,ref_cluster,sum)}))
 })
-lapply(rlt.deconlm,function(x){apply(x,2,summary)})
 
-#Raw
+#LMY
 
-setwd("/Users/wenrurumon/Documents/uthealth/deconv/ae")
-bulk <- fread('bulk.csv')
-ref <- fread('reference.csv')
-# setwd("/Users/wenrurumon/Documents/uthealth/deconv/adni_data")
-# bulk <- fread('bulk_adni.csv')
-# ref <- fread('ref_adni.csv')
-x <- ref %>% as.matrix 
-y <- bulk %>% as.matrix
-x.sel <- apply(x,1,function(xi){
-  names(which(xi>quantile(xi,0.99)))
-}) %>% unlist %>% unique
-y.sel <- y[,colnames(y)%in%x.sel]
-x.sel <- x[,colnames(x)%in%x.sel]
-dim(y.sel)
-system.time(deconv.sel <- deconv(t(x.sel),t(y.sel),ifprint=T))
-models.sel <- list(deconv=deconv.sel,fit=dedeconv((x),deconv.sel$coef,(y)))
-system.time(deconv.sel <- deconv.lm(t(x.sel),t(y.sel),ifprint=T))
-fit.sel <- dedeconv((x),deconv.sel,(y))
-models.sellm <- list(deconv=deconv.sel,fit=fit.sel)
+models.deconvlmy <- lapply(models.data,function(m){
+  print(paste('####################',j<<-j+1,'####################'))
+  rlt.deconv <- music_quick(t(m$y),t(m$x),verbose=F)
+  rlt.deconv
+})
+models.deconvnnls <- lapply(models.deconvlmy,function(x){
+  t(apply(x[[2]],1,function(x){tapply(x,ref_cluster,sum)}))
+})
+models.deconvlmy <- lapply(models.deconvlmy,function(x){
+  t(apply(x[[1]],1,function(x){tapply(x,ref_cluster,sum)}))
+})
 
-models.sel_rush <- list(models.sel,models.sellm)
+######################################################
+######################################################
 
 rlt <- list(
-  models.deconv,
-  models.deconlm,
-  models.sel_rush,
-  models.sel_adni
+  rlt.deconv,rlt.deconlm,models.deconvnnls,models.deconvlmy
 )
+save(rlt,file='deconv_rlt.rda')
+names(rlt[[1]]) <- sapply(strsplit(names(rlt[[1]]),'_'),function(x){paste0('stf_',x[1],'_',x[2])})
+names(rlt[[2]]) <- sapply(strsplit(names(rlt[[2]]),'_'),function(x){paste0('own_',x[1],'_',x[2])})
+names(rlt[[3]]) <- sapply(strsplit(names(rlt[[3]]),'_'),function(x){paste0('nnls_',x[1],'_',x[2])})
+names(rlt[[4]]) <- sapply(strsplit(names(rlt[[4]]),'_'),function(x){paste0('lmy_',x[1],'_',x[2])})
+rlt <- do.call(c,rlt)
+names(rlt) <- gsub('16055','adni',names(rlt))
+names(rlt) <- gsub('17121','lmy',names(rlt))
+names(rlt) <- gsub('25910','rush',names(rlt))
+rlt <- lapply(rlt,t)
