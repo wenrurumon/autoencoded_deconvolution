@@ -68,6 +68,9 @@ models.deconv <- lapply(models.data,function(m){
   rlt.fit <- dedeconv((m$x),rlt.deconv$coef,(m$y))
   list(deconv=rlt.deconv,fit=rlt.fit)
 })
+tofit.deconv <- lapply(models.deconv,function(x){
+  x$deconv$coef
+})
 rlt.deconv <- lapply(models.deconv,function(x){
   t(apply(x$deconv$coef,2,function(x){tapply(x,ref_cluster,sum)}))
 })
@@ -80,6 +83,9 @@ models.deconlm <- lapply(models.data,function(m){
   rlt.fit <- dedeconv((m$x),rlt.deconv,(m$y))
   list(deconv=rlt.deconv,fit=rlt.fit)
 })
+tofit.deconlm <- lapply(models.deconlm,function(x){
+  x$deconv
+})
 rlt.deconlm <- lapply(models.deconlm,function(x){
   t(apply(x$deconv,2,function(x){tapply(x,ref_cluster,sum)}))
 })
@@ -91,10 +97,16 @@ models.deconvlmy <- lapply(models.data,function(m){
   rlt.deconv <- music_quick(t(m$y),t(m$x),verbose=F)
   rlt.deconv
 })
-models.deconvnnls <- lapply(models.deconvlmy,function(x){
+tofit.deconvnnls <- lapply(models.deconvlmy,function(x){
+  t(x[[2]])
+})
+tofit.deconvlmy <- lapply(models.deconvlmy,function(x){
+  t(x[[1]])
+})
+rlt.deconvnnls <- lapply(models.deconvlmy,function(x){
   t(apply(x[[2]],1,function(x){tapply(x,ref_cluster,sum)}))
 })
-models.deconvlmy <- lapply(models.deconvlmy,function(x){
+rlt.deconvlmy <- lapply(models.deconvlmy,function(x){
   t(apply(x[[1]],1,function(x){tapply(x,ref_cluster,sum)}))
 })
 
@@ -102,9 +114,12 @@ models.deconvlmy <- lapply(models.deconvlmy,function(x){
 ######################################################
 
 rlt <- list(
-  rlt.deconv,rlt.deconlm,models.deconvnnls,models.deconvlmy
+  rlt.deconv,rlt.deconlm,rlt.deconvnnls,rlt.deconvlmy
 )
 save(rlt,file='deconv_rlt.rda')
+rlt <- list(
+  tofit.deconv,tofit.deconlm,tofit.deconvnnls,tofit.deconvlmy
+)
 names(rlt[[1]]) <- sapply(strsplit(names(rlt[[1]]),'_'),function(x){paste0('stf_',x[1],'_',x[2])})
 names(rlt[[2]]) <- sapply(strsplit(names(rlt[[2]]),'_'),function(x){paste0('own_',x[1],'_',x[2])})
 names(rlt[[3]]) <- sapply(strsplit(names(rlt[[3]]),'_'),function(x){paste0('nnls_',x[1],'_',x[2])})
