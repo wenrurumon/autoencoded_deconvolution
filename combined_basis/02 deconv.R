@@ -129,3 +129,58 @@ names(rlt) <- gsub('16055','adni',names(rlt))
 names(rlt) <- gsub('17121','lmy',names(rlt))
 names(rlt) <- gsub('25910','rush',names(rlt))
 rlt <- lapply(rlt,t)
+
+######################################################
+######################################################
+
+rm(list=ls())
+library(keras)
+library(dplyr)
+library(data.table)
+library(nnls)
+setwd('/Users/wenrurumon/Documents/uthealth/deconv/rlt/')
+source('/Users/wenrurumon/Documents/uthealth/deconv/ae/model.R')
+load('deconv_coef.rda')
+models <- dir(pattern='encoded')
+models <- unique(do.call(rbind,strsplit(models,'\\.'))[,1])
+models.data <- lapply(models,function(m){
+  y <- paste0(m,'.bulk_encoded') %>% read.csv
+  x <- paste0(m,'.ref_encoded') %>% read.csv
+  list(y=y,x=x)
+})
+genesel <- function(wf,bulk,ref){
+  setwd(wf)
+  bulk <- fread(bulk)
+  ref <- fread(ref)
+  x <- ref %>% as.matrix 
+  y <- bulk %>% as.matrix
+  list(y=y,x=x)
+}
+genesel.load <- list(
+  c("/Users/wenrurumon/Documents/uthealth/deconv/adni_data",'bulk_adni.csv','ref_adni.csv'),
+  c('/Users/wenrurumon/Documents/uthealth/deconv/lmy','bulk_lmy.csv','ref_lmy.csv'),
+  c('/Users/wenrurumon/Documents/uthealth/deconv/ae','bulk.csv','reference.csv')
+)
+sel.data <- lapply(genesel.load,function(x){
+  genesel(x[1],x[2],x[3])
+})
+names(models.data) <- models 
+names(models.data) <- sapply(strsplit(names(models.data),'_'),function(x){paste0(x[1],'_',x[2])})
+names(models.data) <- gsub('16055','adni',names(models.data))
+names(models.data) <- gsub('17121','lmy',names(models.data))
+names(models.data) <- gsub('25910','rush',names(models.data))
+names(sel.data) <- c('sel_adni','sel_lmy','sel_rush')
+models.data <- do.call(c,list(models.data,sel.data))
+test <- lapply(1:length(rlt),function(i){
+  Coef <- rlt[[i]]
+  Data <- models.data[[which(names(models.data)==substr(names(rlt)[i],regexpr('_',names(rlt)[i])+1,nchar(names(rlt)[i])))]]
+  out <- list(dedeconv((Data$x),t(Coef),(Data$y)))
+  names(out) <- names(models.data)[which(names(models.data)==substr(names(rlt)[i],regexpr('_',names(rlt)[i])+1,nchar(names(rlt)[i])))]
+  out
+})
+test <- do.call(c,test)
+names(test) <- names(rlt)
+rlt <- test 
+for (i in 1:length(test)){
+  write.csv(rlt[[i]],paste0(names(rlt)[i],'.bulk_fit'),row.names=F)
+}
