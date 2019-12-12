@@ -2,6 +2,9 @@
 music_quick <- function(bulk,ref,markers=NULL,select.ct=NULL,verbose=T,iter.max=1000,nu=0.0001,eps=0.01,centered=FALSE,normalize=FALSE){
   bulk <- apply(bulk,2,minmax)
   ref <- apply(ref,2,minmax)
+  if(is.null(rownames(bulk))){
+    rownames(bulk) <- rownames(ref) <- paste0('g',1:nrow(bulk))  
+  }
   M.theta <- Sigma <- ref
   Sigma[,] <- 1
   S <- rbind(colMeans(M.theta))
