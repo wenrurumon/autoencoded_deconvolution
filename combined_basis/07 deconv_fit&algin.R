@@ -27,14 +27,15 @@ colnames(fit_sel) <- colnames(fit_model) <- c('decoder','model','mse')
 rlt <- rbind(fit_model,fit_sel)[,-1]
 rlt <- data.table(do.call(rbind,strsplit(rlt$model,'_|\\.')),rlt[,-1])[,-4:-5]
 colnames(rlt) <- c('deconvolution','reduction','dataset','mse')
+rlt.mse <- rlt
 
-boxplot(mse~reduction,data=rlt)
-boxplot(mse~deconvolution,data=rlt)
+boxplot(mse~reduction,data=rlt,main='MSE by reduction method')
+boxplot(mse~deconvolution,data=rlt,main='MSE by deconvolution method')
 
 ########################################
 ########################################
 
-rm(list=ls())
+# rm(list=ls())
 library(pheatmap)
 
 setwd('/Users/wenrurumon/Documents/uthealth/deconv/lmy')
@@ -96,6 +97,34 @@ fdata <- function(x){
   r
 }
 
+rlt.mse <- as.matrix(rlt.mse)
+rlt.kl <- melt(rlt.dis)
+rlt.kl <- cbind(
+  rlt.kl,
+  m1 = do.call(rbind,strsplit(paste(rlt.kl$Var1),'_'))[,2],
+  m2 = do.call(rbind,strsplit(paste(rlt.kl$Var2),'_'))[,2]
+)
+rlt.kl <- cbind(
+  (rlt.kl %>% group_by(Var1) %>% summarise(kl1 = mean(value))),
+  k2=(rlt.kl %>% filter(m1==m2) %>% group_by(Var1) %>% summarise(kl2 = mean(value)))$kl2
+)
+rlt.mse <- data.frame(Var1=paste(rlt.mse[,1],rlt.mse[,2],rlt.mse[,3],sep='_'),
+                      mse=as.numeric(paste(rlt.mse[,4])))
+rlt <- merge(rlt.mse,rlt.kl,by='Var1')
+rlt <- cbind(do.call(rbind,strsplit(paste(rlt$Var1),'_')),rlt[,-1])
+colnames(rlt)[1:3] <- c('deconvolution','reduction','dataset')
+
+plot(rlt$mse,rlt$kl1)
+
+library(ggplot2)
+colnames(rlt)[4:6] <- c('MSE','KL_distance','KL_distance2') 
+rlt$reduction <- toupper(rlt$reduction)
+rlt$deconvolution <- toupper(rlt$deconvolution)
+ggplot(rlt,aes(x = MSE, y = KL_distance, col= reduction)) + geom_point(size=3)
+ggplot(rlt,aes(x = MSE, y = KL_distance2, col= reduction)) + geom_point(size=3)
+ggplot(rlt,aes(x = MSE, y = KL_distance, col= deconvolution)) + geom_point(size=3)
+ggplot(rlt,aes(x = MSE, y = KL_distance, col= dataset)) + geom_point(size=3)
+
 ########################################################
 ########################################################
 
@@ -108,16 +137,19 @@ boxplot(value~Var1,data=melt(rlt.dis)%>%filter(Var1!=Var2),
         par(las='2',mar=c(10,5,5,5)),
         xlab='',ylab='')
 
-par(mfrow=c(1,3))
+par(mfrow=c(1,2))
 boxplot(value~v1,data=fdata('_ae_'),
         par(las='2',mar=c(10,5,5,5)),
-        xlab='',ylab='',main='autoencoder')
+        xlab='',ylab='',main='Autoencoder',ylim=c(0,140))
 boxplot(value~v1,data=fdata('_sel_'),
         par(las='2',mar=c(10,5,5,5)),
-        xlab='',ylab='',main='gene selected')
+        xlab='',ylab='',main='Gene Selected',ylim=c(0,140))
 boxplot(value~v1,data=fdata('_vae_'),
         par(las='2',mar=c(10,5,5,5)),
-        xlab='',ylab='',main='variational autoencoder')
+        xlab='',ylab='',main='Variational Autoencoder',ylim=c(0,140))
+boxplot(value~v1,data=fdata('_pca_'),
+        par(las='2',mar=c(10,5,5,5)),
+        xlab='',ylab='',main='PCA',ylim=c(0,140))
 
 par(mfrow=c(1,4))
 boxplot(value~v1,data=fdata('lmy_'),
