@@ -55,6 +55,21 @@ names(rlt) <- gsub('25910','rush',names(rlt))
 rlt <- lapply(rlt,t)
 rlt <- rlt[match(sort(sapply(strsplit(names(rlt),'_'),function(x){paste(x[2],x[1],x[3],sep="_")}))
                  ,sapply(strsplit(names(rlt),'_'),function(x){paste(x[2],x[1],x[3],sep="_")}))]
+rlt1 <- rlt
+load('deconv_rlt2.rda')
+names(rlt[[1]]) <- sapply(strsplit(names(rlt[[1]]),'_'),function(x){paste0('stf_',x[1],'_',x[2])})
+names(rlt[[2]]) <- sapply(strsplit(names(rlt[[2]]),'_'),function(x){paste0('own_',x[1],'_',x[2])})
+names(rlt[[3]]) <- sapply(strsplit(names(rlt[[3]]),'_'),function(x){paste0('nnls_',x[1],'_',x[2])})
+names(rlt[[4]]) <- sapply(strsplit(names(rlt[[4]]),'_'),function(x){paste0('lmy_',x[1],'_',x[2])})
+rlt <- do.call(c,rlt)
+names(rlt) <- gsub('16055','adni',names(rlt))
+names(rlt) <- gsub('17121','lmy',names(rlt))
+names(rlt) <- gsub('25910','rush',names(rlt))
+rlt <- lapply(rlt,t)
+rlt <- rlt[match(sort(sapply(strsplit(names(rlt),'_'),function(x){paste(x[2],x[1],x[3],sep="_")}))
+                 ,sapply(strsplit(names(rlt),'_'),function(x){paste(x[2],x[1],x[3],sep="_")}))]
+rlt2 <- rlt
+rlt <- c(rlt1,rlt2)
 
 rlt.quantile <- lapply(rlt,function(x){
   apply(x,1,function(x){
